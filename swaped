@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+DEFAULT_PATH="/swapfile"
+
+set -e
+
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+  echo "Usage: $0 <size> [path]"
+  exit 1
+fi
+
+if [ -z "$2" ]; then
+  echo "defaulting path to $DEFAULT_PATH"
+  targetpath="$DEFAULT_PATH"
+else
+  targetpath="$2"
+fi
+
+set -x
+
+swapoff -a # Turn off swap
+if [ -f "$targetpath" ]; then
+  rm "$targetpath" # Delete old swap file
+fi
+fallocate -l "$1" "$targetpath" # Allocate a new swap file
+chmod 600 "$targetpath" # Set permissions
+mkswap "$targetpath" # Register the swap file
+swapon "$targetpath" # Activate the swap file
